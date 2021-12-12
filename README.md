@@ -40,6 +40,18 @@ After training, the results in shown below.
 
 From the figure above, we can see that the network, even if simple, managed to represent well the solution of the proposed differential equation.
 
+## References
+- Ehsan Haghighat, Maziar Raissi, Adrian Moure, Hector Gomez, and Ruben Juanes. **“A physics-informed deep learning framework for inversion and surrogate modeling in solid mechanics”**. In: Computer Methods in Applied Mechanics and Engineering 379 (2021), p. 113741. URL: https://bit.ly/3nInVEP.
+
+- Maziar Raissi, Paris Perdikaris, and George E Karniadakis. **“Physics-Informed Neural Networks: A Deep Learning Framework for Solving Forward and Inverse Problems Involving Nonlinear Partial Differential Equations”**. In: Journal of Computational Physics 378 (2019), pp. 686–707. URL: https://bit.ly/2SmVsqq.
+
+- JARED WILLARD and XIAOWEI JIA, SHAOMING XU, MICHAEL STEINBACH, MICHAEL STEINBACH. **"Integrating Physics-Based Modeling With Machine Learning: A Survey"**. arXiv:2003.04919v4.
+
+- Massachusetts Institute of Technology (MIT). **18.337J/6.338J: Parallel Computing and Scientific Machine Learning**. Lectures Notes.
+
+- Barba, Lorena A., and Forsyth, Gilbert F. (2018). **CFD Python: the 12 steps to Navier-Stokes equations**. Journal of Open Source Education, 1(9), 21, https://doi.org/10.21105/jose.00021.
+
+
 ## Contributors
 The list of contributors is presented below.
 <table>
