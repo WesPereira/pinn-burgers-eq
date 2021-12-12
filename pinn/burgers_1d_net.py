@@ -2,7 +2,7 @@ from typing import List
 import torch
 import torch.nn as nn
 import numpy as np
-from pinn.utils import log
+from pinn.utils.util import log, perf
 
 
 class SimpleModel(nn.Module):
@@ -43,7 +43,8 @@ class SimpleModel(nn.Module):
 
 
 class PinnBurgers1D:
-    def __init__(self, X_u: np.ndarray, u: np.ndarray, X_f, nu: float) -> None:
+    def __init__(self, X_u: np.ndarray, u: np.ndarray, X_f,
+                 nu: float, layers: List[int]) -> None:
         """[summary]
 
         Args:
@@ -70,8 +71,7 @@ class PinnBurgers1D:
 
         self.zeros_t =  torch.zeros((self.x_f.shape[0], 1))
 
-        self.net = SimpleModel()
-        self.net.apply(self.init_weights)
+        self.net = SimpleModel(layers)
 
         self.loss = nn.MSELoss()
 
@@ -86,19 +86,6 @@ class PinnBurgers1D:
 
         self.ls = 0
         self.iter = 0
-
-    def init_weights(self, m: torch.nn) -> None:
-        """[summary]
-
-        Args:
-            m (torch.nn): [description]
-
-        Returns:
-            [type]: [description]
-        """
-        if type(m) == nn.Linear:
-            torch.nn.init.xavier_normal_(m.weight, 0.1)
-            m.bias.data.fill_(0.001)
 
     def net_u(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         """[summary]
@@ -162,6 +149,7 @@ class PinnBurgers1D:
 
         return self.ls
 
+    @perf
     def train(self):
         """
         Train method
