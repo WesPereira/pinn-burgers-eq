@@ -1,9 +1,20 @@
+from typing import Tuple
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
+from matplotlib.figure import Figure, Axes
 
 
-def figsize(scale, nplots = 1):
+def figsize(scale: float, nplots = 1) -> Tuple[float, float]:
+    """
+    Create figsize based on scale and nplots
+
+    Args:
+        scale (float): Scale.
+        nplots (int, optional): number of plots. Defaults to 1.
+
+    Returns:
+        Tuple[float, float]: figsize tuple
+    """
     fig_width_pt = 390.0
     inches_per_pt = 1.0/72.27
     golden_mean = (np.sqrt(5.0)-1.0)/2.0
@@ -32,11 +43,28 @@ pgf_with_latex = {
 }
 
 
-def newfig(width, nplots = 1):
+def newfig(width, nplots = 1) -> Tuple[Figure, Axes]:
+    """
+    Create new figure.
+
+    Args:
+        width ([type]): width of image
+        nplots (int, optional): number of plots per image. Defaults to 1.
+
+    Returns:
+        Tuple[Figure, Axes]: new figure with its respective axis.
+    """
     fig = plt.figure(figsize=figsize(width, nplots))
     ax = fig.add_subplot(111)
     return fig, ax
 
 
 def savefig(fig: Figure, filename: str):
+    """
+    save figure.
+
+    Args:
+        fig (Figure): figure to save.
+        filename (str): path/filename to save figure.
+    """
     fig.savefig(filename, dpi=fig.dpi)

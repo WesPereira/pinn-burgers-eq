@@ -10,14 +10,12 @@ class SimpleModel(nn.Module):
     def __init__(
         self, layers: List[int] = [2, 20, 20, 20, 20, 20, 20, 20, 20, 1]
     ) -> None:
-        """[summary]
+        """
+        Model init.
 
         Args:
-            layers (List[int], optional): [description]. 
+            layers (List[int], optional): Layers structure. 
             Defaults to [2, 20, 20, 20, 20, 20, 20, 20, 20, 1].
-
-        Returns:
-            [type]: [description]
         """
         super().__init__()
         
@@ -30,28 +28,30 @@ class SimpleModel(nn.Module):
         modules.pop()
         self.model = nn.Sequential(*modules)
     
-    def forward(self, x):
-        """[summary]
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward method.
 
         Args:
-            x ([type]): [description]
+            x (torch.Tensor): input.
 
         Returns:
-            [type]: [description]
+            torch.Tensor: Output tensor.
         """
         return self.model(x)
 
 
 class PinnBurgers1D:
-    def __init__(self, X_u: np.ndarray, u: np.ndarray, X_f,
+    def __init__(self, X_u: np.ndarray, u: np.ndarray, X_f: np.ndarray,
                  nu: float, layers: List[int]) -> None:
-        """[summary]
+        """
+        Init function.
 
         Args:
-            X_u (np.ndarray): [description]
-            u (np.ndarray): [description]
-            X_f ([type]): [description]
-            nu (float): [description]
+            X_u (np.ndarray): X_u array.
+            u (np.ndarray): u array.
+            X_f (np.ndarray): X_f array.
+            nu (float): nu condition float.
         """
         self.nu = nu
         self.x_u = torch.tensor(X_u[:, 0].reshape(-1, 1),
@@ -88,27 +88,29 @@ class PinnBurgers1D:
         self.iter = 0
 
     def net_u(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
-        """[summary]
+        """
+        Represents u function at Burgers equation.
 
         Args:
-            x (torch.Tensor): [description]
-            t (torch.Tensor): [description]
+            x (torch.Tensor): spatial data.
+            t (torch.Tensor): time data.
 
         Returns:
-            torch.Tensor: [description]
+            torch.Tensor: u output tensor.
         """
         u = self.net(torch.hstack((x, t)))
         return u
 
     def net_f(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
-        """[summary]
+        """
+        Represents f function at Burgers equation.
 
         Args:
-            x (torch.Tensor): [description]
-            t (torch.Tensor): [description]
+            x (torch.Tensor): spatial data.
+            t (torch.Tensor): time data.
 
         Returns:
-            torch.Tensor: [description]
+            torch.Tensor: f output tensor.
         """
         u = self.net_u(x, t)
 

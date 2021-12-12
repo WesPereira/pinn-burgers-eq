@@ -83,6 +83,12 @@ def _plot(result: torch.Tensor, X_star: np.ndarray, X: np.ndarray,
 
 @perf
 def train(save_path: str):
+    """
+    Train main function
+
+    Args:
+        save_path (str): path to save model weights.
+    """
     log.info('Starting to load data...')
     
     with open('data_burgers.pkl', 'rb') as f:

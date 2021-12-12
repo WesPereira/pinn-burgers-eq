@@ -38,8 +38,10 @@ After training, the results in shown below.
 
 ![image 2](imgs/image2.png)
 
-## Contributors
+From the figure above, we can see that the network, even if simple, managed to represent well the solution of the proposed differential equation.
 
+## Contributors
+The list of contributors is presented below.
 <table>
   <tr>
     <td align="center"><a href="https://github.com/WesPereira"><img src="https://avatars.githubusercontent.com/u/49962478?v=4" width="100px;" alt=""/><br /><sub><b>WesPereira</b></sub></a><br /></td>
