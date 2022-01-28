@@ -29,7 +29,15 @@ sudo apt-get install texlive-latex-extra texlive-fonts-recommended dvipng cm-sup
 And finally, run training:
 
 ```bash
-python3 train.py --save_path=/example/weights.pt
+python3 train.py --save_path /example/weights.pt
+```
+
+### 2D Burgers equation
+
+To train 2D burgers equation put data file at root of the project with name `burger_data_2d.mat`. Then, run de follow command, changing desired hiperparameters:
+
+```bash
+python train_2d.py --path /test/path/aa.pt --epochs 100000 --nu 5000 --nf 50000 --a 3.4
 ```
 
 ## Results for 1D Burgers Equation
@@ -58,5 +66,6 @@ The list of contributors is presented below.
   <tr>
     <td align="center"><a href="https://github.com/WesPereira"><img src="https://avatars.githubusercontent.com/u/49962478?v=4" width="100px;" alt=""/><br /><sub><b>WesPereira</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/esgomi"><img src="https://avatars.githubusercontent.com/u/6525442?v=4" width="100px;" alt=""/><br /><sub><b>esgomi</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/marlonsmathias"><img src="https://avatars.githubusercontent.com/u/81258808?v=4" width="100px;" alt=""/><br /><sub><b>marlonsmathias</b></sub></a><br /></td>
   </tr>
 </table>

@@ -27,7 +27,7 @@ class SimpleModel(nn.Module):
         # Remove last tanh
         modules.pop()
         self.model = nn.Sequential(*modules)
-    
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Forward method.
@@ -41,46 +41,61 @@ class SimpleModel(nn.Module):
         return self.model(x)
 
 
-class PinnBurgers1D:
-    def __init__(self, X_u: np.ndarray, u: np.ndarray, v: np.ndarray,
-                 X_f: np.ndarray, nu: float, layers: List[int]) -> None:
+class PinnBurgers2D:
+    def __init__(self, X_u: np.ndarray, sol: np.ndarray, X_f: np.ndarray,
+                 nu: float, layers: List[int], device: torch.device = 'cpu',
+                 alpha: float = 1.0, epochs: int = 50000) -> None:
         """
         Init function.
 
         Args:
-            X_u (np.ndarray): X_u array.
-            u (np.ndarray): u array.
+            X_u (np.ndarray): X_u array for u solution.
+            sol (np.ndarray): sol array for X_u vars.
             X_f (np.ndarray): X_f array.
             nu (float): nu condition float.
+            layers (List[int]): MLP structure.
+            device (torch.device): device for training.
+            alpha (float): Constant for balancing physics and pure NN.
+            epochs (int): Number of epochs for training
         """
         self.nu = nu
         self.x_u = torch.tensor(X_u[:, 0].reshape(-1, 1),
                                 dtype=torch.float,
-                                requires_grad=True)
-        self.t_u = torch.tensor(X_u[:, 1].reshape(-1, 1),
+                                requires_grad=True).to(device)
+        self.y_u = torch.tensor(X_u[:, 1].reshape(-1, 1),
                                 dtype=torch.float,
-                                requires_grad=True)
+                                requires_grad=True).to(device)
+        self.t_u = torch.tensor(X_u[:, 2].reshape(-1, 1),
+                                dtype=torch.float,
+                                requires_grad=True).to(device)
         self.x_f = torch.tensor(X_f[:, 0].reshape(-1, 1),
                                 dtype=torch.float,
-                                requires_grad=True)
-        self.t_f = torch.tensor(X_f[:, 1].reshape(-1, 1),
+                                requires_grad=True).to(device)
+        self.y_f = torch.tensor(X_f[:, 1].reshape(-1, 1),
                                 dtype=torch.float,
-                                requires_grad=True)
-
-        self.u = torch.tensor(u, dtype=torch.float)
+                                requires_grad=True).to(device)
+        self.t_f = torch.tensor(X_f[:, 2].reshape(-1, 1),
+                                dtype=torch.float,
+                                requires_grad=True).to(device)
         
-        self.v = torch.tensor(v, dtype=torch.float)
+        self.u = torch.tensor(sol[:,0].reshape(-1, 1),
+                              dtype=torch.float).to(device)
+        
+        self.v = torch.tensor(sol[:,1].reshape(-1, 1),
+                              dtype=torch.float).to(device)
 
-        self.zeros_t =  torch.zeros((self.x_f.shape[0], 1))
+        self.zeros_t = torch.zeros((self.x_f.shape[0], 1)).to(device)
 
         self.net = SimpleModel(layers)
+        self.net = self.net.to(device)
 
         self.loss = nn.MSELoss()
+        self.loss = self.loss.to(device)
 
         self.optimizer = torch.optim.LBFGS(self.net.parameters(),
                                     lr=1,
-                                    max_iter=50000,
-                                    max_eval=50000,
+                                    max_iter=epochs,
+                                    max_eval=epochs,
                                     history_size=50,
                                     tolerance_grad=1e-05,
                                     tolerance_change=0.5 * np.finfo(float).eps,
@@ -88,6 +103,7 @@ class PinnBurgers1D:
 
         self.ls = 0
         self.iter = 0
+        self.alpha = alpha
 
     def net_u_and_v(self, x: torch.Tensor, y: torch.Tensor,
               t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -102,7 +118,9 @@ class PinnBurgers1D:
         Returns:
             Tuple[torch.Tensor, torch.Tensor]: u and v output tensors.
         """
-        u, v = self.net(torch.hstack((x, y, t)))
+        x = self.net(torch.hstack((x, y, t)))
+        u = x[:,0].reshape(-1, 1)
+        v = x[:,1].reshape(-1, 1)
         return u, v
 
     def net_f(self, x: torch.Tensor, y: torch.Tensor,
@@ -170,7 +188,7 @@ class PinnBurgers1D:
         v_loss = self.loss(v_pred, self.v)
         f_loss_one = self.loss(f_pred_one, self.zeros_t)
         f_loss_two = self.loss(f_pred_two, self.zeros_t)
-        self.ls = u_loss + v_loss + f_loss_one + f_loss_two
+        self.ls = u_loss + v_loss + self.alpha*(f_loss_one + f_loss_two)
 
         self.ls.backward()
 
