@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from pinn.utils.util import log, perf
+from pinn.losses import MAEScaledLoss
 
 
 class SimpleModel(nn.Module):
@@ -89,7 +90,7 @@ class PinnBurgers2D:
         self.net = SimpleModel(layers)
         self.net = self.net.to(device)
 
-        self.loss = nn.MSELoss()
+        self.loss = MAEScaledLoss()
         self.loss = self.loss.to(device)
 
         self.optimizer = torch.optim.LBFGS(self.net.parameters(),
