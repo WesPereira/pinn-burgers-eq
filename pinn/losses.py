@@ -31,3 +31,14 @@ class MAEScaledLoss(nn.Module):
         """
         error = self.loss(y_pred, y_true)
         return self.factor * error
+
+
+class LossFactory:
+    LOSSES_DICT = {
+        'mse': nn.MSELoss,
+        'mae': MAEScaledLoss
+    }
+    
+    @classmethod
+    def get_loss(cls, key: str) -> nn.Module:
+        return cls.LOSSES_DICT[key]

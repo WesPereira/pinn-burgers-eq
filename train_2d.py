@@ -40,6 +40,11 @@ def _get_args():
                         default=1,
                         help='Constant for balancing physics and pure NN.')
     
+    parser.add_argument('--loss',
+                        type=str,
+                        default='mse',
+                        help="Loss type. Values: ['mse', 'mae']")
+    
     args = parser.parse_args()
     
     return args
@@ -65,34 +70,34 @@ def main():
     t = data['t'].flatten()[:,None]
     x = data['x'].flatten()[:,None]
     y = data['y'].flatten()[:,None]
-    u_sol = np.real(data['vref']).T
-    v_sol = np.real(data['uref']).T
+    u_sol = np.real(data['uref'])
+    v_sol = np.real(data['vref'])
 
-    X, Y, T = np.meshgrid(x,y,t)
+    Y, X, T = np.meshgrid(y,x,t)
 
-    vars_values = np.hstack((X.flatten()[:,None], X.flatten()[:,None],
+    vars_values = np.hstack((Y.flatten()[:,None], X.flatten()[:,None],
                              T.flatten()[:,None]))
 
     lb = vars_values.min(0)
     ub = vars_values.max(0)
 
-    xx1 = np.vstack((X[:,:,0:1].flatten(), Y[:,:,0:1].flatten(),
+    xx1 = np.vstack((Y[:,:,0:1].flatten(), X[:,:,0:1].flatten(),
                      T[:,:,0:1].flatten()))
     xx1 = np.moveaxis(xx1, -1, 0)
 
-    xx2 = np.vstack((X[:,0:1,:].flatten(), Y[:,0:1,:].flatten(),
+    xx2 = np.vstack((Y[:,0:1,:].flatten(), X[:,0:1,:].flatten(),
                      T[:,0:1,:].flatten()))
     xx2 = np.moveaxis(xx2, -1, 0)
 
-    xx3 = np.vstack((X[0:1,:,:].flatten(), Y[0:1,:,:].flatten(),
+    xx3 = np.vstack((Y[0:1,:,:].flatten(), X[0:1,:,:].flatten(),
                      T[0:1,:,:].flatten()))
     xx3 = np.moveaxis(xx3, -1, 0)
     
-    xx4 = np.vstack((X[-1:,:,:].flatten(), Y[-1:,:,:].flatten(),
+    xx4 = np.vstack((Y[-1:,:,:].flatten(), X[-1:,:,:].flatten(),
                      T[-1:,:,:].flatten()))
     xx4 = np.moveaxis(xx4, -1, 0)
 
-    xx5 = np.vstack((X[:,-1:,:].flatten(), Y[:,-1:,:].flatten(),
+    xx5 = np.vstack((Y[:,-1:,:].flatten(), X[:,-1:,:].flatten(),
                      T[:,-1:,:].flatten()))
     xx5 = np.moveaxis(xx5, -1, 0)
     
@@ -126,7 +131,7 @@ def main():
     u_train = u_train[idx,:]
 
     model = PinnBurgers2D(vars_u_train, u_train, vars_f_train,
-                          nu, layers, device, args.a, args.epochs)
+                          nu, layers, device, args.a, args.epochs, args.loss)
 
     start_time = time.time()
     model.train()

@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from pinn.utils.util import log, perf
-from pinn.losses import MAEScaledLoss
+from pinn.losses import LossFactory
 
 
 class SimpleModel(nn.Module):
@@ -45,7 +45,8 @@ class SimpleModel(nn.Module):
 class PinnBurgers2D:
     def __init__(self, X_u: np.ndarray, sol: np.ndarray, X_f: np.ndarray,
                  nu: float, layers: List[int], device: torch.device = 'cpu',
-                 alpha: float = 1.0, epochs: int = 50000) -> None:
+                 alpha: float = 1.0,
+                 epochs: int = 50000, loss: str = 'mse') -> None:
         """
         Init function.
 
@@ -60,19 +61,19 @@ class PinnBurgers2D:
             epochs (int): Number of epochs for training
         """
         self.nu = nu
-        self.x_u = torch.tensor(X_u[:, 0].reshape(-1, 1),
+        self.x_u = torch.tensor(X_u[:, 1].reshape(-1, 1),
                                 dtype=torch.float,
                                 requires_grad=True).to(device)
-        self.y_u = torch.tensor(X_u[:, 1].reshape(-1, 1),
+        self.y_u = torch.tensor(X_u[:, 0].reshape(-1, 1),
                                 dtype=torch.float,
                                 requires_grad=True).to(device)
         self.t_u = torch.tensor(X_u[:, 2].reshape(-1, 1),
                                 dtype=torch.float,
                                 requires_grad=True).to(device)
-        self.x_f = torch.tensor(X_f[:, 0].reshape(-1, 1),
+        self.x_f = torch.tensor(X_f[:, 1].reshape(-1, 1),
                                 dtype=torch.float,
                                 requires_grad=True).to(device)
-        self.y_f = torch.tensor(X_f[:, 1].reshape(-1, 1),
+        self.y_f = torch.tensor(X_f[:, 0].reshape(-1, 1),
                                 dtype=torch.float,
                                 requires_grad=True).to(device)
         self.t_f = torch.tensor(X_f[:, 2].reshape(-1, 1),
@@ -90,7 +91,7 @@ class PinnBurgers2D:
         self.net = SimpleModel(layers)
         self.net = self.net.to(device)
 
-        self.loss = MAEScaledLoss()
+        self.loss = LossFactory.get_loss(loss)()
         self.loss = self.loss.to(device)
 
         self.optimizer = torch.optim.LBFGS(self.net.parameters(),
