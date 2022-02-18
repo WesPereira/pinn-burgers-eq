@@ -91,7 +91,7 @@ class PinnBurgers2D:
         self.net = SimpleModel(layers)
         self.net = self.net.to(device)
 
-        self.loss = LossFactory.get_loss(loss)()
+        self.loss = nn.MSELoss()
         self.loss = self.loss.to(device)
 
         self.optimizer = torch.optim.LBFGS(self.net.parameters(),
