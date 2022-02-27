@@ -23,7 +23,12 @@ def _get_args():
     parser.add_argument('--nu',
                         type=int,
                         default=1000,
-                        help='Number of pointzs of the simulation.')
+                        help='Number of points of the simulation.')
+    
+    parser.add_argument('--ni',
+                        type=int,
+                        default=1000,
+                        help='Number of points inside the grid of the simulation.')
     
     parser.add_argument('--nf',
                         type=int,
@@ -64,6 +69,7 @@ def main():
     nu = 0.01/np.pi
 
     N_u = args.nu
+    N_i = args.ni
     N_f = args.nf
     layers = [3, 20, 20, 20, 20, 20, 20, 20, 20, 2]
 
@@ -101,6 +107,10 @@ def main():
                      T[:,-1:,:].flatten()))
     xx5 = np.moveaxis(xx5, -1, 0)
     
+    xx6 = np.vstack((Y[1:-1,1:-1,1:].flatten(), X[1:-1,1:-1,1:].flatten(),
+                     T[1:-1,1:-1,1:].flatten()))
+    xx6 = np.moveaxis(xx6, -1, 0)
+    
     pre_sol1_u = u_sol[:,:,0:1].flatten()
     pre_sol1_v = v_sol[:,:,0:1].flatten()
     sol1 = np.moveaxis(np.vstack((pre_sol1_u, pre_sol1_v)), 0, -1)
@@ -120,15 +130,30 @@ def main():
     pre_sol5_u = u_sol[:,-1:,:].flatten()
     pre_sol5_v = v_sol[:,-1:,:].flatten()
     sol5 = np.moveaxis(np.vstack((pre_sol5_u, pre_sol5_v)), 0, -1)
+    
+    # inside the grid
+    pre_sol6_u = u_sol[1:-1,1:-1,1:].flatten()
+    pre_sol6_v = v_sol[1:-1,1:-1,1:].flatten()
+    sol6 = np.moveaxis(np.vstack((pre_sol6_u, pre_sol6_v)), 0, -1)
 
     vars_u_train = np.vstack([xx1, xx2, xx3, xx4, xx5])
+    vars_u_i_train = np.vstack([xx6])
     vars_f_train = lb + (ub-lb)*lhs(3, N_f)
     vars_f_train = np.vstack((vars_f_train, vars_u_train))
     u_train = np.vstack([sol1, sol2, sol3, sol4, sol5])
+    u_i_train = np.vstack([sol6])
 
     idx = np.random.choice(vars_u_train.shape[0], N_u, replace=False)
     vars_u_train = vars_u_train[idx, :]
     u_train = u_train[idx,:]
+    
+    # get random points inside the grid
+    idx = np.random.choice(vars_u_i_train.shape[0], N_i, replace=False)
+    vars_u_i_train = vars_u_i_train[idx, :]
+    u_i_train = u_i_train[idx,:]
+    
+    vars_u_train = np.vstack([vars_u_train, vars_u_i_train])
+    u_train = np.vstack([u_train, u_i_train])
 
     model = PinnBurgers2D(vars_u_train, u_train, vars_f_train,
                           nu, layers, device, args.a, args.epochs, args.loss)

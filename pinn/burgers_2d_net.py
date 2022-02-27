@@ -170,8 +170,8 @@ class PinnBurgers2D:
         v_yy = torch.autograd.grad(v_y, y, grad_outputs=torch.ones_like(v_y),
                                    retain_graph=True, create_graph=True)[0]
 
-        f_one = u_t + u*u_x - v*u_y - self.nu*(u_xx + u_yy)
-        f_two = v_t + u*v_x - v*v_y - self.nu*(v_xx + v_yy)
+        f_one = u_t + u*u_x + v*u_y - self.nu*(u_xx + u_yy)
+        f_two = v_t + u*v_x + v*v_y - self.nu*(v_xx + v_yy)
 
         return f_one, f_two
 
