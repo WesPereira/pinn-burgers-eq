@@ -1,3 +1,4 @@
+import csv
 import time
 import argparse
 from pathlib import Path
@@ -166,6 +167,25 @@ def main():
     save_path = Path(args.path)
     Path(str(save_path.parents[0])).mkdir(parents=True, exist_ok=True)
     torch.save(model.net.state_dict(), args.path)
+    avg_mem = model.acc_mem / model.iter
+    with open('log.txt', 'a') as f:
+        f.write(20*'=')
+        f.write('\n')
+        f.write('Model Configs:\n')
+        f.write(f'N_u = {args.nu}\n')
+        f.write(f'N_f = {args.nf}\n')
+        f.write(f'N_i = {args.ni}\n')
+        f.write(f'Alpha = {args.a}\n')
+        f.write(f'Loss = {model.ls:.6f}\n')
+        f.write(f'Epochs elapsed = {model.iter}\n')
+        f.write(f'Time to train = {elapsed:.6f} s')
+        f.write(f'Average memory usage = {avg_mem:.4f} MB\n')
+        f.write('\n')
+    with open('log.csv', 'a') as f:
+        line = [args.nu, args.nf, args.ni, args.a, float(model.ls),
+                model.iter, elapsed, avg_mem]
+        writer = csv.writer(f)
+        writer.writerow(line)
     log.info('Finished training.')
 
 

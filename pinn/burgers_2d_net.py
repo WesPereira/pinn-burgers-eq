@@ -106,6 +106,7 @@ class PinnBurgers2D:
         self.ls = 0
         self.iter = 0
         self.alpha = alpha
+        self.acc_mem = 0
 
     def net_u_and_v(self, x: torch.Tensor, y: torch.Tensor,
               t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -190,11 +191,14 @@ class PinnBurgers2D:
         v_loss = self.loss(v_pred, self.v)
         f_loss_one = self.loss(f_pred_one, self.zeros_t)
         f_loss_two = self.loss(f_pred_two, self.zeros_t)
-        self.ls = u_loss + v_loss + self.alpha*(f_loss_one + f_loss_two)
+        self.ls = (1 - self.alpha)*(u_loss + v_loss) + \
+                  self.alpha*(f_loss_one + f_loss_two)
 
         self.ls.backward()
 
         self.iter += 1
+
+        self.acc_mem += torch.cuda.memory_allocated(0) / (1024 * 1024)
 
         if self.iter % 50 == 0:
             log.info(f'Epoch: {self.iter}, Loss: {self.ls:6.3f}')
